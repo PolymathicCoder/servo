@@ -2,6 +2,7 @@ dependencies {
   compile project(':servo-core')
   compile project(':servo-atlas')
   compile project(':servo-graphite')
+  compile project(':servo-influxdb')
 }
 
 task(run, dependsOn: 'classes', type: JavaExec) {
