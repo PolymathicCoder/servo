@@ -28,6 +28,8 @@ import com.netflix.servo.publish.PollScheduler;
 import com.netflix.servo.publish.atlas.AtlasMetricObserver;
 import com.netflix.servo.publish.atlas.ServoAtlasConfig;
 import com.netflix.servo.publish.graphite.GraphiteMetricObserver;
+import com.netflix.servo.publish.influxdb.InfluxDBConfiguration;
+import com.netflix.servo.publish.influxdb.InfluxDBMetricObserver;
 import com.netflix.servo.tag.BasicTagList;
 import com.netflix.servo.tag.TagList;
 import com.sun.net.httpserver.HttpServer;
@@ -93,6 +95,12 @@ public final class Main {
     return rateTransform(async("atlas", new AtlasMetricObserver(cfg, common)));
   }
 
+  private static MetricObserver createInfluxDBObserver() {
+	  final InfluxDBConfiguration influxDBConfiguration = Config.getInfluxDBConfiguration();
+	  final TagList common = getCommonTags();
+	  return rateTransform(async("influx", new InfluxDBMetricObserver(influxDBConfiguration, common)));
+ }
+
   private static void schedule(MetricPoller poller, List<MetricObserver> observers) {
     final PollRunnable task = new PollRunnable(poller, BasicMetricFilter.MATCH_ALL,
         true, observers);
@@ -111,6 +119,10 @@ public final class Main {
 
     if (Config.isGraphiteObserverEnabled()) {
       observers.add(createGraphiteObserver());
+    }
+
+    if (Config.isInfluxDBObserverEnabled()) {
+      observers.add(createInfluxDBObserver());
     }
 
     PollScheduler.getInstance().start();

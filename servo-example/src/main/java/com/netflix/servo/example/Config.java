@@ -17,8 +17,10 @@ package com.netflix.servo.example;
 
 import com.netflix.servo.monitor.Pollers;
 import com.netflix.servo.publish.atlas.ServoAtlasConfig;
+import com.netflix.servo.publish.influxdb.InfluxDBConfiguration;
 
 import java.io.File;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Utility class dealing with different settings used to run the examples.
@@ -76,6 +78,14 @@ public final class Config {
   public static String getGraphiteObserverAddress() {
     return System.getProperty("servo.example.graphiteObserverAddress", "localhost:2003");
   }
+  
+  /**
+   * Should we report metrics to InfluxDB? Default is false.
+   */
+  public static boolean isInfluxDBObserverEnabled() {
+    return Boolean.valueOf(System.getProperty("servo.example.isInfluxDBObserverEnabled",
+        "true"));
+  }
 
   /**
    * Should we report metrics to atlas? Default is false.
@@ -124,5 +134,17 @@ public final class Config {
         return 10000;
       }
     };
+  }
+  
+  public static InfluxDBConfiguration getInfluxDBConfiguration() {	  
+	  return new InfluxDBConfiguration(
+      System.getProperty("servo.example.influxDBObserverUri", "http://localhost:8086"),
+      System.getProperty("servo.example.influxDBObserverUsername", "root"), 
+      System.getProperty("servo.example.influxDBObserverPassword", "root"), 
+      System.getProperty("servo.example.influxDBObserverDatabaseName", "metrics"),
+      new InfluxDBConfiguration.BatchPolicy(
+        Integer.parseInt(System.getProperty("servo.example.influxDBObserverBatchPolicy.flushEveryPoints", "2000")),
+        Integer.parseInt(System.getProperty("servo.example.influxDBObserverBatchPolicy.flushAtLeastEvery", "100")),
+        TimeUnit.valueOf(System.getProperty("servo.example.influxDBObserverBatchPolicy.flushAtLeastEveryTimeUnit", "MILLISECONDS"))));
   }
 }
